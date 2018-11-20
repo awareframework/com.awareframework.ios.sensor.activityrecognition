@@ -1,5 +1,5 @@
 import XCTest
-import com.awareframework.ios.sensor.activityrecognition
+import com_awareframework_ios_sensor_activityrecognition
 
 class Tests: XCTestCase {
     

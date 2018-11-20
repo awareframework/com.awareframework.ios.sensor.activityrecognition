@@ -7,12 +7,27 @@
 //
 
 import UIKit
+import com_awareframework_ios_sensor_activityrecognition
 
 class ViewController: UIViewController {
+    
+    var sensor:ActivityRecognitionSensor?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{config in
+            config.debug = true
+            config.interval = 1
+        })
+        sensor?.start()
+    }
+    
+    class Observer:ActivityRecognitionObserver{
+        func onActivityChanged(data: Array<ActivityRecognitionData>) {
+            print(data)
+        }
     }
 
     override func didReceiveMemoryWarning() {

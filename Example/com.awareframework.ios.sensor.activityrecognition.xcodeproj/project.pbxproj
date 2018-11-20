@@ -42,9 +42,9 @@
 		607FACE51AFB9204008FA782 /* com.awareframework.ios.sensor.activityrecognition_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = com.awareframework.ios.sensor.activityrecognition_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
-		6BA808A2928B7516330495F9 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		87FAA10C3BA88211214BA409 /* com.awareframework.ios.sensor.activityrecognition.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = com.awareframework.ios.sensor.activityrecognition.podspec; path = ../com.awareframework.ios.sensor.activityrecognition.podspec; sourceTree = "<group>"; };
-		9D9D2A8B6B2D00F3723884C7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		6BA808A2928B7516330495F9 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		87FAA10C3BA88211214BA409 /* com.awareframework.ios.sensor.activityrecognition.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = com.awareframework.ios.sensor.activityrecognition.podspec; path = ../com.awareframework.ios.sensor.activityrecognition.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9D9D2A8B6B2D00F3723884C7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		BC463301F5DD71B15609B660 /* Pods-com.awareframework.ios.sensor.activityrecognition_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-com.awareframework.ios.sensor.activityrecognition_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-com.awareframework.ios.sensor.activityrecognition_Tests/Pods-com.awareframework.ios.sensor.activityrecognition_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		F094BBADAEA65BFFCD86BBB3 /* Pods_com_awareframework_ios_sensor_activityrecognition_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_com_awareframework_ios_sensor_activityrecognition_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -212,6 +212,7 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = FH352PYMNC;
 						LastSwiftMigration = 0900;
 					};
 					607FACE41AFB9204008FA782 = {
@@ -314,13 +315,25 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-com.awareframework.ios.sensor.activityrecognition_Example/Pods-com.awareframework.ios.sensor.activityrecognition_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Networking/Networking.framework",
+				"${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
 				"${BUILT_PRODUCTS_DIR}/com.awareframework.ios.sensor.activityrecognition/com_awareframework_ios_sensor_activityrecognition.framework",
+				"${BUILT_PRODUCTS_DIR}/com.awareframework.ios.sensor.core/com_awareframework_ios_sensor_core.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Networking.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Reachability.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/com_awareframework_ios_sensor_activityrecognition.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/com_awareframework_ios_sensor_core.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -422,7 +435,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -468,7 +481,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -481,7 +494,9 @@
 			baseConfigurationReference = 2C1EDE7F4046363E977B8B64 /* Pods-com.awareframework.ios.sensor.activityrecognition_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = FH352PYMNC;
 				INFOPLIST_FILE = com.awareframework.ios.sensor.activityrecognition/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
@@ -496,7 +511,9 @@
 			baseConfigurationReference = 47B3EFAB74A3A423CE02908E /* Pods-com.awareframework.ios.sensor.activityrecognition_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = FH352PYMNC;
 				INFOPLIST_FILE = com.awareframework.ios.sensor.activityrecognition/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
