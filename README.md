@@ -1,15 +1,14 @@
-# com.aware.ios.sensor.activityrecognition
+# Aware Activity Recognition
 
-[![CI Status](https://img.shields.io/travis/tetujin/com.aware.ios.sensor.activityrecognition.svg?style=flat)](https://travis-ci.org/tetujin/com.aware.ios.sensor.activityrecognition)
-[![Version](https://img.shields.io/cocoapods/v/com.aware.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.aware.ios.sensor.activityrecognition)
-[![License](https://img.shields.io/cocoapods/l/com.aware.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.aware.ios.sensor.activityrecognition)
-[![Platform](https://img.shields.io/cocoapods/p/com.aware.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.aware.ios.sensor.activityrecognition)
+[![CI Status](https://img.shields.io/travis/awareframework/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://travis-ci.org/awareframework/com.awareframework.ios.sensor.activityrecognition)
+[![Version](https://img.shields.io/cocoapods/v/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.awareframework.ios.sensor.activityrecognition)
+[![License](https://img.shields.io/cocoapods/l/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.awareframework.ios.sensor.activityrecognition)
+[![Platform](https://img.shields.io/cocoapods/p/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.awareframework.ios.sensor.activityrecognition)
 
-## Example
-
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+**Aware Activity Recognition** (com.awareframework.ios.sensor.activityrecognition) is a plugin for AWARE Framework which is one of an open-source context-aware instrument. This plugin allows us to manage motion activity data (such as running, walking, and automotive) that is provided by iOS [CMMotionActivityManager](https://developer.apple.com/documentation/coremotion/cmmotionactivitymanager).
 
 ## Requirements
+iOS 10 or later
 
 ## Installation
 
@@ -26,6 +25,26 @@ import com_aware_ios_sensor_activityrecognition
 ```
 
 3. Add a description of `NSMotionUsageDescription` into Info.plist
+
+## Data Representations
+
+### Activity Recognition Data
+| Field        | Type   | Description                                                            |
+| ------------ | ------ | ---------------------------------------------------------------------- |
+| startDate   | Long | The time (unixtime milliseconds since 1970) at which the change in motion occurred. |
+| confidence  | Int  | The [confidence](https://developer.apple.com/documentation/coremotion/cmmotionactivityconfidence) in the assessment of the motion type. |
+| stationary  | Bool | A Boolean indicating whether the device is stationary.|
+| walking     | Bool | A Boolean indicating whether the device is on a walking person. |
+| running     | Bool | A Boolean indicating whether the device is on a running person. |
+| automotive  | Bool | A Boolean indicating whether the device is in an automobile. |
+| cycling     | Bool | A Boolean indicating whether the device is in a bicycle. |
+| unknown     | Bool | A Boolean indicating whether the type of motion is unknown. |
+| deviceId     | String | AWARE device UUID                                                      |
+| label        | String | Customizable label. Useful for data calibration or traceability        |
+| timestamp    | Long   | Unixtime milliseconds since 1970                                       |
+| timezone     | Int    | Timezone of the device                                 |
+| os           | String | Operating system of the device (e.g., iOS)                           |
+
 
 ## Example usage
 ```swift
@@ -48,7 +67,12 @@ class Observer:ActivityRecognitionObserver {
 
 ## Author
 
-Yuuki Nishiyama, tetujin@ht.sfc.keio.ac.jp
+Yuuki Nishiyama, yuuki.nishiyama@oulu.fi
+
+## Related Links
+* [Apple | CMMotionActivityManager](https://developer.apple.com/documentation/coremotion/cmmotionactivitymanager)
+* [Apple | CMMotionActivity](https://developer.apple.com/documentation/coremotion/cmmotionactivity)
+* [Apple | CMMotionActivityConfidence](https://developer.apple.com/documentation/coremotion/cmmotionactivityconfidence)
 
 ## License
 
