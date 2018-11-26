@@ -12,8 +12,6 @@ public class ActivityRecognitionData: AwareObject {
 
     public static let TABLE_NAME = "activityRecognitionTable"
     
-    @objc dynamic public var to:Int64   = 0
-    @objc dynamic public var from:Int64 = 0
     @objc dynamic public var activities:String = ""
     @objc dynamic public var confidence:Int    = 0
     @objc dynamic public var stationary:Bool   = false

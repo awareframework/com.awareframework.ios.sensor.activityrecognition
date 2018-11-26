@@ -18,6 +18,23 @@ class Tests: XCTestCase {
         XCTAssert(true, "Pass")
     }
     
+    func testConfig(){
+        
+        let interval = 1.0
+
+        // default check
+        var sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config.init())
+        XCTAssertEqual(10, sensor.CONFIG.interval)
+        
+        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config.init().apply{config in
+            config.interval = interval
+        })
+        XCTAssertEqual(interval, sensor.CONFIG.interval)
+        
+        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config(["interval":interval]))
+        XCTAssertEqual(interval, sensor.CONFIG.interval)
+    }
+    
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure() {

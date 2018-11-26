@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftyJSON
 import CoreMotion
 import com_awareframework_ios_sensor_core
 
@@ -31,8 +30,11 @@ public class ActivityRecognitionSensor: AwareSensor {
             dbPath = "aware_activityrecognition"
         }
         
-        public convenience init(_ json:JSON){
+        public convenience init(_ config:Dictionary<String,Any>){
             self.init()
+            if let interval = config["interval"] as? Double {
+                self.interval = interval
+            }
         }
         
         public func apply(closure:(_ config: ActivityRecognitionSensor.Config) -> Void) -> Self {
@@ -91,8 +93,6 @@ public class ActivityRecognitionSensor: AwareSensor {
                             // USE_LAST_ACTIVITY
                             let data = ActivityRecognitionData()
                             data.timestamp = Int64(fromDate.timeIntervalSince1970*1000)
-                            data.from = Int64(fromDate.timeIntervalSince1970*1000)
-                            data.to = Int64(toDate.timeIntervalSince1970*1000)
                             data.automotive = self.LAST_ACTIVITY.automotive
                             data.cycling = self.LAST_ACTIVITY.cycling
                             data.running = self.LAST_ACTIVITY.running
@@ -105,8 +105,6 @@ public class ActivityRecognitionSensor: AwareSensor {
                             for activity in uwActivities {
                                 let data = ActivityRecognitionData()
                                 data.timestamp = Int64(activity.startDate.timeIntervalSince1970*1000)
-                                data.from = Int64(fromDate.timeIntervalSince1970*1000)
-                                data.to = Int64(toDate.timeIntervalSince1970*1000)
                                 data.automotive = activity.automotive
                                 data.cycling = activity.cycling
                                 data.running = activity.running
