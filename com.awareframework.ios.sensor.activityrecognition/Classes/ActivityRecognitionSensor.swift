@@ -21,7 +21,7 @@ public class ActivityRecognitionSensor: AwareSensor {
     
     public class Config:SensorConfig{
         
-        public var interval = 10.0 // min
+        public var interval:Int = 10 // min
         
         public var sensorObserver:ActivityRecognitionObserver?
         
@@ -30,9 +30,9 @@ public class ActivityRecognitionSensor: AwareSensor {
             dbPath = "aware_activityrecognition"
         }
         
-        public convenience init(_ config:Dictionary<String,Any>){
-            self.init()
-            if let interval = config["interval"] as? Double {
+        public override func set(config: Dictionary<String, Any>) {
+            super.set(config: config)
+            if let interval = config["interval"] as? Int {
                 self.interval = interval
             }
         }
@@ -62,7 +62,7 @@ public class ActivityRecognitionSensor: AwareSensor {
         }
         if CMMotionActivityManager.isActivityAvailable() {
             self.motionActivityManager = CMMotionActivityManager()
-            self.timer = Timer.scheduledTimer(withTimeInterval: self.CONFIG.interval*60, repeats: true, block: { timer in
+            self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.CONFIG.interval)*60.0, repeats: true, block: { timer in
                 if !self.inRecoveryLoop {
                     self.getActivityRecognitionData()
                 }else{
@@ -84,7 +84,7 @@ public class ActivityRecognitionSensor: AwareSensor {
             let diffBetweemNowAndFromDate = now.minutes(from: fromDate)
             // if self.CONFIG.debug{ print(ActivityRecognitionSensor.TAG, "diff: \(diffBetweemNowAndFromDate) min") }
             if diffBetweemNowAndFromDate > Int(CONFIG.interval) {
-                let toDate = fromDate.addingTimeInterval(60*self.CONFIG.interval)
+                let toDate = fromDate.addingTimeInterval(60.0*Double(self.CONFIG.interval))
                 maManager.queryActivityStarting(from: fromDate, to: toDate, to: .main) { (activities, error) in
                     // save pedometer data
                     var dataArray = Array<ActivityRecognitionData>()

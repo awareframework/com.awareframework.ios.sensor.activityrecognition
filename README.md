@@ -41,9 +41,7 @@ Class to hold the configuration of the sensor.
 #### Fields
 
 + `sensorObserver: ActivityRecognitionObserver`: Callback for live data updates.
-+ `interval: Double`: Data sampling interval in minute. (default = 10)
-+ `period: Double`: Period to save data in minutes. (default = 1)
-+ `threshold: Double`: If set, do not record consecutive points if change in value is less than the set value.
++ `interval: Int`: Data sampling interval in minute. (default = 10)
 + `enabled: Boolean` Sensor is enabled or not. (default = `false`)
 + `debug: Boolean` enable/disable logging to `Logcat`. (default = `false`)
 + `label: String` Label for the data. (default = "")
@@ -114,9 +112,9 @@ class Observer:ActivityRecognitionObserver {
 Yuuki Nishiyama, yuuki.nishiyama@oulu.fi
 
 ## Related Links
-* [Apple | CMMotionActivityManager](https://developer.apple.com/documentation/coremotion/cmmotionactivitymanager)
-* [Apple | CMMotionActivity](https://developer.apple.com/documentation/coremotion/cmmotionactivity)
-* [Apple | CMMotionActivityConfidence](https://developer.apple.com/documentation/coremotion/cmmotionactivityconfidence)
+* [ Apple | CMMotionActivityManager ](https://developer.apple.com/documentation/coremotion/cmmotionactivitymanager)
+* [ Apple | CMMotionActivity ](https://developer.apple.com/documentation/coremotion/cmmotionactivity)
+* [ Apple | CMMotionActivityConfidence ](https://developer.apple.com/documentation/coremotion/cmmotionactivityconfidence)
 
 ## License
 

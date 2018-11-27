@@ -20,7 +20,7 @@ class Tests: XCTestCase {
     
     func testConfig(){
         
-        let interval = 1.0
+        let interval = 1
 
         // default check
         var sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config.init())
@@ -32,6 +32,10 @@ class Tests: XCTestCase {
         XCTAssertEqual(interval, sensor.CONFIG.interval)
         
         sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config(["interval":interval]))
+        XCTAssertEqual(interval, sensor.CONFIG.interval)
+        
+        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config())
+        sensor.CONFIG.set(config: ["interval":interval])
         XCTAssertEqual(interval, sensor.CONFIG.interval)
     }
     
