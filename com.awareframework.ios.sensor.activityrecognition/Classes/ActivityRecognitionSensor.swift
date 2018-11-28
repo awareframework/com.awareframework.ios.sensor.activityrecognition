@@ -167,7 +167,7 @@ public class ActivityRecognitionSensor: AwareSensor {
     
     public override func sync(force: Bool = false) {
         if let engine = self.dbEngine {
-            engine.startSync(ActivityRecognitionData.TABLE_NAME , DbSyncConfig().apply{config in
+            engine.startSync(ActivityRecognitionData.TABLE_NAME , ActivityRecognitionData.self, DbSyncConfig().apply{config in
                 config.debug = self.CONFIG.debug
             })
         }
