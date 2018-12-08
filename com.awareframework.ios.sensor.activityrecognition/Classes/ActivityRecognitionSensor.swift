@@ -22,6 +22,16 @@ public class ActivityRecognitionSensor: AwareSensor {
     public class Config:SensorConfig{
         
         public var interval:Int = 10 // min
+        {
+            didSet {
+                if self.interval <= 0 {
+                    print("[ActivityRecognition][Illegal Parameter]",
+                          "The `interval` value has to be greater than 0.",
+                          "This paprameter ('\(self.interval)') is ignored.")
+                    self.interval = oldValue
+                }
+            }
+        }
         
         public var sensorObserver:ActivityRecognitionObserver?
         
@@ -170,7 +180,15 @@ public class ActivityRecognitionSensor: AwareSensor {
             engine.startSync(ActivityRecognitionData.TABLE_NAME , ActivityRecognitionData.self, DbSyncConfig().apply{config in
                 config.debug = self.CONFIG.debug
             })
+            self.notificationCenter.post(name: .actionAwareActivityRecognitionSync , object: nil)
         }
+    }
+    
+    public func set(label:String){
+        self.CONFIG.label = label
+        self.notificationCenter.post(name: .actionAwareActivityRecognitionSetLabel,
+                                     object: nil,
+                                     userInfo: [ActivityRecognitionSensor.EXTRA_LABEL:label])
     }
 }
 
@@ -199,6 +217,7 @@ extension ActivityRecognitionSensor{
     public static let ACTION_AWARE_ACTIVITYRECOGNITION_STOP  = "ACTION_AWARE_ACTIVITYRECOGNITION_STOP"
     public static let ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL = "ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL"
     public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC"
+    public static var EXTRA_LABEL = "label"
 }
 
 extension ActivityRecognitionSensor {
