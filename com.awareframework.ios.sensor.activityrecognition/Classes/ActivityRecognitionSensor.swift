@@ -136,10 +136,6 @@ public class ActivityRecognitionSensor: AwareSensor {
                             }
                         }
                         
-                        if let engine = self.dbEngine {
-                            engine.save(dataArray, ActivityRecognitionData.TABLE_NAME)
-                        }
-                        
                         if self.CONFIG.debug {
                             // print(ActivityRecognitionSensor.TAG, "" )
                         }
@@ -148,16 +144,26 @@ public class ActivityRecognitionSensor: AwareSensor {
                             observer.onActivityChanged(data:dataArray)
                         }
                         
-                        self.notificationCenter.post(name: .actionAwareActivityRecognition , object: nil)
-                    }
-                    
-                    self.setLastUpdateDateTime(toDate)
-                    let diffBetweenNowAndToDate = now.minutes(from: toDate)
-                    if diffBetweenNowAndToDate > Int(self.CONFIG.interval){
-                        self.inRecoveryLoop = true;
-                        self.getActivityRecognitionData()
-                    }else{
-                        self.inRecoveryLoop = false;
+                        if let engine = self.dbEngine {
+                            let queue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.save.queue")
+                            queue.async {
+                                engine.save(dataArray){error in
+                                    if error == nil {
+                                        DispatchQueue.main.async {
+                                            self.setLastUpdateDateTime(toDate)
+                                            let diffBetweenNowAndToDate = now.minutes(from: toDate)
+                                            if diffBetweenNowAndToDate > Int(self.CONFIG.interval){
+                                                self.inRecoveryLoop = true;
+                                                self.getActivityRecognitionData()
+                                            }else{
+                                                self.inRecoveryLoop = false;
+                                            }
+                                            self.notificationCenter.post(name: .actionAwareActivityRecognition , object: nil)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }else{
@@ -179,12 +185,20 @@ public class ActivityRecognitionSensor: AwareSensor {
         if let engine = self.dbEngine {
             engine.startSync(ActivityRecognitionData.TABLE_NAME , ActivityRecognitionData.self, DbSyncConfig().apply{config in
                 config.debug = self.CONFIG.debug
+                config.dispatchQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.sync.queue")
+                config.completionHandler = { (status, error) in
+                    if status {
+                        self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncSuccess , object: nil)
+                    } else {
+                        self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncFailure , object: nil)
+                    }
+                }
             })
             self.notificationCenter.post(name: .actionAwareActivityRecognitionSync , object: nil)
         }
     }
     
-    public func set(label:String){
+    public override func set(label:String){
         self.CONFIG.label = label
         self.notificationCenter.post(name: .actionAwareActivityRecognitionSetLabel,
                                      object: nil,
@@ -209,6 +223,8 @@ extension Notification.Name{
     public static let actionAwareActivityRecognitionStop = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_STOP)
     public static let actionAwareActivityRecognitionSync = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC)
     public static let actionAwareActivityRecognitionSetLabel = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL)
+    public static let actionAwareActivityRecognitionSyncSuccess = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_SUCCESS)
+    public static let actionAwareActivityRecognitionSyncFailure = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_FAILURE)
 }
 
 extension ActivityRecognitionSensor{
@@ -217,6 +233,8 @@ extension ActivityRecognitionSensor{
     public static let ACTION_AWARE_ACTIVITYRECOGNITION_STOP  = "ACTION_AWARE_ACTIVITYRECOGNITION_STOP"
     public static let ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL = "ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL"
     public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_SUCCESS  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC_SUCCESS"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_FAILURE  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC_FAILURE"
     public static var EXTRA_LABEL = "label"
 }
 

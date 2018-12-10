@@ -1,6 +1,7 @@
 import XCTest
 import RealmSwift
 import com_awareframework_ios_sensor_activityrecognition
+import com_awareframework_ios_sensor_core
 
 class Tests: XCTestCase {
     
@@ -45,8 +46,7 @@ class Tests: XCTestCase {
                                                          object: nil,
                                                          queue: .main) { (notification) in
             if let engine = sensor.dbEngine {
-                if let results = engine.fetch(ActivityRecognitionData.TABLE_NAME,
-                                              ActivityRecognitionData.self,
+                if let results = engine.fetch(ActivityRecognitionData.self,
                                               nil) as? Results<Object>{
                     // arStorageeExpect.fulfill()
                     if !isDone{
@@ -182,5 +182,60 @@ class Tests: XCTestCase {
         XCTAssertFalse(dict["automotive"] as! Bool)
         XCTAssertFalse(dict["cycling"] as! Bool)
         XCTAssertFalse(dict["unknown"] as! Bool)
+    }
+    
+    func testSyncModule(){
+        #if targetEnvironment(simulator)
+        
+        print("This test requires a real device.")
+        
+        #else
+        // success //
+        let sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{ config in
+            config.debug = true
+            config.dbType = .REALM
+            config.dbHost = "node.awareframework.com:1001"
+            config.dbPath = "sync_db"
+        })
+        if let engine = sensor.dbEngine as? RealmEngine {
+            engine.removeAll(ActivityRecognitionData.self)
+            for _ in 0..<100 {
+                engine.save(ActivityRecognitionData())
+            }
+        }
+        let successExpectation = XCTestExpectation(description: "success sync")
+        let observer = NotificationCenter.default.addObserver(forName: Notification.Name.actionAwareActivityRecognitionSyncSuccess,
+                                                              object: nil, queue: .main) { (notification) in
+                                                                successExpectation.fulfill()
+        }
+        sensor.sync(force: true)
+        wait(for: [successExpectation], timeout: 20)
+        NotificationCenter.default.removeObserver(observer)
+        
+        ////////////////////////////////////
+        
+        // failure //
+        let sensor2 = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{ config in
+            config.debug = true
+            config.dbType = .REALM
+            config.dbHost = "node.awareframework.com.com" // wrong url
+            config.dbPath = "sync_db"
+        })
+        let failureExpectation = XCTestExpectation(description: "failure sync")
+        let failureObserver = NotificationCenter.default.addObserver(forName: Notification.Name.actionAwareActivityRecognitionSyncFailure,
+                                                                     object: nil, queue: .main) { (notification) in
+                                                                        failureExpectation.fulfill()
+        }
+        if let engine = sensor2.dbEngine as? RealmEngine {
+            engine.removeAll(ActivityRecognitionData.self)
+            for _ in 0..<100 {
+                engine.save(ActivityRecognitionData())
+            }
+        }
+        sensor2.sync(force: true)
+        wait(for: [failureExpectation], timeout: 20)
+        NotificationCenter.default.removeObserver(failureObserver)
+        
+        #endif
     }
 }
