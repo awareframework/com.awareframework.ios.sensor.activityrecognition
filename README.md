@@ -48,7 +48,7 @@ Class to hold the configuration of the sensor.
 + `deviceId: String` Id of the device that will be associated with the events and the sensor. (default = "")
 + `dbEncryptionKey: String` Encryption key for the database. (default = `null`)
 + `dbType: Engine` Which db engine to use for saving data. (default = `Engine.DatabaseType.NONE`)
-+ `dbPath: String` Path of the database. (default = "aware_accelerometer")
++ `dbPath: String` Path of the database. (default = "aware_activityrecognition")
 + `dbHost: String` Host for syncing the database. (default = `null`)
 
 ## Broadcasts
@@ -85,7 +85,7 @@ Contains the raw sensor data.
 | label     | String | Customizable label. Useful for data calibration or traceability     |
 | timestamp | Int64   | Unixtime milliseconds since 1970                                          |
 | timezone  | Int    | Timezone  of the device                                       |
-| os        | String | Operating system of the device (ex. android)                              |
+| os        | String | Operating system of the device (ex. ios)                              |
 
 
 ## Example usage
