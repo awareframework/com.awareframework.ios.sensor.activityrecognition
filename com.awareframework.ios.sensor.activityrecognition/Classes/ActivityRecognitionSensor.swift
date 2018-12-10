@@ -80,7 +80,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                 }
             })
             self.timer?.fire()
-            self.notificationCenter.post(name: .actionAwareActivityRecognitionStart, object: nil)
+            self.notificationCenter.post(name: .actionAwareActivityRecognitionStart, object: self)
         }else{
             if self.CONFIG.debug {
                 print(ActivityRecognitionSensor.TAG, "CMMotionActivityManager is not available.")
@@ -110,6 +110,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                             data.unknown = self.LAST_ACTIVITY.unknown
                             data.walking = self.LAST_ACTIVITY.walking
                             data.confidence = self.LAST_ACTIVITY.confidence
+                            data.label = self.CONFIG.label
                             dataArray.append(data)
                         }else{
                             for activity in uwActivities {
@@ -122,6 +123,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                                 data.unknown = activity.unknown
                                 data.walking = activity.walking
                                 data.confidence = activity.confidence.rawValue
+                                data.label = self.CONFIG.label
                                 dataArray.append(data)
                                 
                                 switch activity.confidence {
@@ -158,7 +160,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                                             }else{
                                                 self.inRecoveryLoop = false;
                                             }
-                                            self.notificationCenter.post(name: .actionAwareActivityRecognition , object: nil)
+                                            self.notificationCenter.post(name: .actionAwareActivityRecognition , object: self)
                                         }
                                     }
                                 }
@@ -177,7 +179,7 @@ public class ActivityRecognitionSensor: AwareSensor {
             uwTimer.invalidate()
             timer = nil
             motionActivityManager = nil
-            self.notificationCenter.post(name: .actionAwareActivityRecognitionStop , object: nil)
+            self.notificationCenter.post(name: .actionAwareActivityRecognitionStop , object: self)
         }
     }
     
@@ -187,21 +189,23 @@ public class ActivityRecognitionSensor: AwareSensor {
                 config.debug = self.CONFIG.debug
                 config.dispatchQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.sync.queue")
                 config.completionHandler = { (status, error) in
-                    if status {
-                        self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncSuccess , object: nil)
-                    } else {
-                        self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncFailure , object: nil)
+                    var userInfo: Dictionary<String,Any> = [ActivityRecognitionSensor.EXTRA_STATUS :status]
+                    if let e = error {
+                        userInfo[ActivityRecognitionSensor.EXTRA_ERROR] = e
                     }
+                    self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncCompletion ,
+                                                 object: self,
+                                                 userInfo:userInfo)
                 }
             })
-            self.notificationCenter.post(name: .actionAwareActivityRecognitionSync , object: nil)
+            self.notificationCenter.post(name: .actionAwareActivityRecognitionSync , object: self)
         }
     }
     
     public override func set(label:String){
         self.CONFIG.label = label
         self.notificationCenter.post(name: .actionAwareActivityRecognitionSetLabel,
-                                     object: nil,
+                                     object: self,
                                      userInfo: [ActivityRecognitionSensor.EXTRA_LABEL:label])
     }
 }
@@ -223,19 +227,19 @@ extension Notification.Name{
     public static let actionAwareActivityRecognitionStop = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_STOP)
     public static let actionAwareActivityRecognitionSync = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC)
     public static let actionAwareActivityRecognitionSetLabel = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL)
-    public static let actionAwareActivityRecognitionSyncSuccess = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_SUCCESS)
-    public static let actionAwareActivityRecognitionSyncFailure = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_FAILURE)
+    public static let actionAwareActivityRecognitionSyncCompletion = Notification.Name(ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_COMPLETION)
 }
 
 extension ActivityRecognitionSensor{
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION       = "ACTION_AWARE_ACTIVITYRECOGNITION"
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION_START = "ACTION_AWARE_ACTIVITYRECOGNITION_START"
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION_STOP  = "ACTION_AWARE_ACTIVITYRECOGNITION_STOP"
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL = "ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL"
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC"
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_SUCCESS  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC_SUCCESS"
-    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_FAILURE  = "ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC_FAILURE"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION       = "com.awareframework.ios.sensor.activityrecognition.ACTION_AWARE_ACTIVITYRECOGNITION"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_START = "com.awareframework.ios.sensor.activityrecognition.ACTION_AWARE_ACTIVITYRECOGNITION_START"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_STOP  = "com.awareframework.ios.sensor.activityrecognition.ACTION_AWARE_ACTIVITYRECOGNITION_STOP"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL = "com.awareframework.ios.sensor.activityrecognition.ACTION_AWARE_ACTIVITYRECOGNITION_SET_LABEL"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC  = "com.awareframework.ios.sensor.activityrecognition.ACTION_AWARE_ACTIVITYRECOGNITION_SENSOR_SYNC"
+    public static let ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_COMPLETION = "com.awareframework.ios.sensor.activityrecognition.ACTION_AWARE_ACTIVITYRECOGNITION_SYNC_SUCCESS_COMPLETION"
     public static var EXTRA_LABEL = "label"
+    public static let EXTRA_STATUS = "status"
+    public static let EXTRA_ERROR = "error"
 }
 
 extension ActivityRecognitionSensor {

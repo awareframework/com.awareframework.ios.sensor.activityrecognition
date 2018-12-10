@@ -10,7 +10,7 @@ import com_awareframework_ios_sensor_core
 
 public class ActivityRecognitionData: AwareObject {
 
-    public static let TABLE_NAME = "activityRecognitionTable"
+    public static let TABLE_NAME = "activityRecognitionData"
     
     @objc dynamic public var activities:String = ""
     @objc dynamic public var confidence:Int    = 0

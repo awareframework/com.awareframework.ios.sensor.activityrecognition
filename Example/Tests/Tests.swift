@@ -184,10 +184,12 @@ class Tests: XCTestCase {
         XCTAssertFalse(dict["unknown"] as! Bool)
     }
     
+    
+    
     func testSyncModule(){
         #if targetEnvironment(simulator)
         
-        print("This test requires a real device.")
+        print("This test requires a real ActivityRecognition.")
         
         #else
         // success //
@@ -204,9 +206,15 @@ class Tests: XCTestCase {
             }
         }
         let successExpectation = XCTestExpectation(description: "success sync")
-        let observer = NotificationCenter.default.addObserver(forName: Notification.Name.actionAwareActivityRecognitionSyncSuccess,
-                                                              object: nil, queue: .main) { (notification) in
-                                                                successExpectation.fulfill()
+        let observer = NotificationCenter.default.addObserver(forName: Notification.Name.actionAwareActivityRecognitionSyncCompletion,
+                                                              object: sensor, queue: .main) { (notification) in
+                                                                if let userInfo = notification.userInfo{
+                                                                    if let status = userInfo["status"] as? Bool {
+                                                                        if status == true {
+                                                                            successExpectation.fulfill()
+                                                                        }
+                                                                    }
+                                                                }
         }
         sensor.sync(force: true)
         wait(for: [successExpectation], timeout: 20)
@@ -222,9 +230,15 @@ class Tests: XCTestCase {
             config.dbPath = "sync_db"
         })
         let failureExpectation = XCTestExpectation(description: "failure sync")
-        let failureObserver = NotificationCenter.default.addObserver(forName: Notification.Name.actionAwareActivityRecognitionSyncFailure,
-                                                                     object: nil, queue: .main) { (notification) in
-                                                                        failureExpectation.fulfill()
+        let failureObserver = NotificationCenter.default.addObserver(forName: Notification.Name.actionAwareActivityRecognitionSyncCompletion,
+                                                                     object: sensor2, queue: .main) { (notification) in
+                                                                        if let userInfo = notification.userInfo{
+                                                                            if let status = userInfo["status"] as? Bool {
+                                                                                if status == false {
+                                                                                    failureExpectation.fulfill()
+                                                                                }
+                                                                            }
+                                                                        }
         }
         if let engine = sensor2.dbEngine as? RealmEngine {
             engine.removeAll(ActivityRecognitionData.self)
@@ -238,4 +252,7 @@ class Tests: XCTestCase {
         
         #endif
     }
+    
+
+    
 }
