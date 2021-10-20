@@ -1,11 +1,11 @@
 use_frameworks!
+platform :ios, '10.0'
 
 target 'com.awareframework.ios.sensor.activityrecognition_Example' do
   pod 'com.awareframework.ios.sensor.activityrecognition', :path => '../'
 
   target 'com.awareframework.ios.sensor.activityrecognition_Tests' do
     inherit! :search_paths
-
     
   end
 end
