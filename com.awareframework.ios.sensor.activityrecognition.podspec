@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'com.awareframework.ios.sensor.activityrecognition'
-  s.version       = '0.5.1'
+  s.version          = '0.5.2'
   s.summary          = 'An Activity Recognition Sensor Module for AWARE Framework.'
 
 # This description is used to generate tags and improve search results.
@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
   s.source_files = 'com.awareframework.ios.sensor.activityrecognition/Classes/**/*'
   
   s.frameworks = 'CoreMotion'
-  s.dependency 'com.awareframework.ios.sensor.core', '~> 0.4.3'
+  s.dependency 'com.awareframework.ios.sensor.core', '~> 0.5.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
     
