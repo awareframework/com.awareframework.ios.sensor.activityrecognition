@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'com.awareframework.ios.sensor.activityrecognition'
-  s.version       = '0.4.1'
+  s.version       = '0.5.0'
   s.summary          = 'An Activity Recognition Sensor Module for AWARE Framework.'
 
 # This description is used to generate tags and improve search results.
@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/awareframework/com.awareframework.ios.sensor.activityrecognition'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'Apache2', :file => 'LICENSE' }
-  s.author           = { 'tetujin' => 'tetujin@ht.sfc.keio.ac.jp' }
+  s.author           = { 'Yuuki Nishiyama' => 'yuukin@iis.u-tokyo.ac.jp' }
   s.source           = { :git => 'https://github.com/awareframework/com.awareframework.ios.sensor.activityrecognition.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
@@ -34,13 +34,9 @@ Pod::Spec.new do |s|
 
   s.source_files = 'com.awareframework.ios.sensor.activityrecognition/Classes/**/*'
   
-  # s.resource_bundles = {
-  #   'com.awareframework.ios.sensor.activityrecognition' => ['com.awareframework.ios.sensor.activityrecognition/Assets/*.png']
-  # }
+  s.frameworks = 'CoreMotion'
+  s.dependency 'com.awareframework.ios.sensor.core', '~> 0.4.3'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  s.frameworks = 'CoreMotion' #, 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
-  s.dependency 'com.awareframework.ios.sensor.core', '~> 0.4.1'
-  
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+    
 end

@@ -17,12 +17,12 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-//        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{config in
-//            config.debug = true
-//            config.interval = 1
-//            config.dbType = .REALM
-//        })
-//        sensor?.start()
+        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{config in
+            config.debug = true
+            config.interval = 1
+            config.dbType = .REALM
+        })
+        sensor?.start()
     }
     
     class Observer:ActivityRecognitionObserver{
