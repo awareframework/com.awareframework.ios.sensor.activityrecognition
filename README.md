@@ -12,16 +12,16 @@ iOS 10 or later
 
 ## Installation
 
-com.aware.ios.sensor.activityrecognition is available through [CocoaPods](https://cocoapods.org). 
+com.awareframework.ios.sensor.activityrecognition is available through [CocoaPods](https://cocoapods.org). 
 
 1. To install it, simply add the following line to your Podfile:
 ```ruby
-pod 'com.aware.ios.sensor.activityrecognition'
+pod 'com.awareframework.ios.sensor.activityrecognition'
 ```
 
-2. com_aware_ios_sensor_activityrecognition  library into your source code.
+2. com_awareframework_ios_sensor_activityrecognition  library into your source code.
 ```swift
-import com_aware_ios_sensor_activityrecognition
+import com_awareframework_ios_sensor_activityrecognition
 ```
 
 3. Add a description of `NSMotionUsageDescription` into Info.plist
