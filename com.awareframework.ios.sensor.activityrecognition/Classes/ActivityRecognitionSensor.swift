@@ -133,7 +133,9 @@ public class ActivityRecognitionSensor: AwareSensor {
                                         print(ActivityRecognitionSensor.TAG, "LAST_ACTIVITY: \(data)")
                                     }
                                 case .low:
-                                    break
+                                    continue
+                                @unknown default:
+                                    continue
                                 }
                             }
                         }
