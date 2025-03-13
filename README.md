@@ -1,19 +1,26 @@
 # AWARE: Activity Recognition
 
-[![CI Status](https://img.shields.io/travis/awareframework/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://travis-ci.org/awareframework/com.awareframework.ios.sensor.activityrecognition)
-[![Version](https://img.shields.io/cocoapods/v/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.awareframework.ios.sensor.activityrecognition)
-[![License](https://img.shields.io/cocoapods/l/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.awareframework.ios.sensor.activityrecognition)
-[![Platform](https://img.shields.io/cocoapods/p/com.awareframework.ios.sensor.activityrecognition.svg?style=flat)](https://cocoapods.org/pods/com.awareframework.ios.sensor.activityrecognition)
+[![Swift Package Manager compatible](https://img.shields.io/badge/Swift%20Package%20Manager-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
 
 **Aware Activity Recognition** (com.awareframework.ios.sensor.activityrecognition) is a plugin for AWARE Framework which is one of an open-source context-aware instrument. This plugin allows us to manage motion activity data (such as running, walking, and automotive) that is provided by iOS [CMMotionActivityManager](https://developer.apple.com/documentation/coremotion/cmmotionactivitymanager).
 
 ## Requirements
-iOS 10 or later
+iOS 13 or later
 
 ## Installation
 
-com.awareframework.ios.sensor.activityrecognition is available through [CocoaPods](https://cocoapods.org). 
+You can integrate this framework into your project via Swift Package Manager (SwiftPM) or CocoaPods.
 
+### SwiftPM
+1. Open Package Manager Windows
+    * Open `Xcode` -> Select `Menu Bar` -> `File` -> `App Package Dependencies...` 
+
+2. Find the package using the manager
+    * Select `Search Package URL` and type `git@github.com:awareframework/com.awareframework.ios.sensor.activityrecognition.git`
+
+3. Import the package into your target.
+
+### CocoaPods
 1. To install it, simply add the following line to your Podfile:
 ```ruby
 pod 'com.awareframework.ios.sensor.activityrecognition'

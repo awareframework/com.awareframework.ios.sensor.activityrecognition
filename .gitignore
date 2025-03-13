@@ -38,3 +38,8 @@ Pods/
 Podfile.lock
 Pods/
 com.awareframework.ios.sensor.activityrecognition.xcworkspace/
+
+.build
+Packages
+.swiftpm
+.*.sw?
