@@ -9,7 +9,7 @@ iOS 13 or later
 
 ## Installation
 
-You can integrate this framework into your project via Swift Package Manager (SwiftPM) or CocoaPods.
+You can integrate this framework into your project via Swift Package Manager (SwiftPM).
 
 ### SwiftPM
 1. Open Package Manager Windows
@@ -20,18 +20,6 @@ You can integrate this framework into your project via Swift Package Manager (Sw
 
 3. Import the package into your target.
 
-### CocoaPods
-1. To install it, simply add the following line to your Podfile:
-```ruby
-pod 'com.awareframework.ios.sensor.activityrecognition'
-```
-
-2. com_awareframework_ios_sensor_activityrecognition  library into your source code.
-```swift
-import com_awareframework_ios_sensor_activityrecognition
-```
-
-3. Add a description of `NSMotionUsageDescription` into Info.plist
 
 ## Public functions
 
@@ -100,7 +88,7 @@ Contains the raw sensor data.
 let activitySensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{config in
     config.debug = true
     config.interval = 15
-    config.dbType = .REALM
+    config.dbType = .sqlite
     config.sensorObserver = Observer()
 })
 activitySensor.start()
@@ -116,7 +104,7 @@ class Observer:ActivityRecognitionObserver {
 
 ## Author
 
-Yuuki Nishiyama, yuuki.nishiyama@oulu.fi
+Yuuki Nishiyama, nishiyama@csis.u-tokyo.ac.jp
 
 ## Related Links
 * [ Apple | CMMotionActivityManager ](https://developer.apple.com/documentation/coremotion/cmmotionactivitymanager)
@@ -125,7 +113,7 @@ Yuuki Nishiyama, yuuki.nishiyama@oulu.fi
 
 ## License
 
-Copyright (c) 2021 AWARE Mobile Context Instrumentation Middleware/Framework (http://www.awareframework.com)
+Copyright (c) 2025 AWARE Mobile Context Instrumentation Middleware/Framework (http://www.awareframework.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 

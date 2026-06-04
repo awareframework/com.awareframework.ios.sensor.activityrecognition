@@ -5,15 +5,15 @@
 //  Created by Yuuki Nishiyama on 2018/11/13.
 //
 
-import UIKit
+//import UIKit
 import CoreMotion
-import com_awareframework_ios_sensor_core
+import com_awareframework_ios_core
 
 public class ActivityRecognitionSensor: AwareSensor {
 
     public static let TAG = "AWARE::ActivityRecognition"
     public var CONFIG:ActivityRecognitionSensor.Config = Config()
-    var LAST_ACTIVITY:ActivityRecognitionData = ActivityRecognitionData()
+    var LAST_ACTIVITY:ActivityRecognitionData?
     
     var motionActivityManager:CMMotionActivityManager?
     var timer:Timer? = nil
@@ -38,6 +38,7 @@ public class ActivityRecognitionSensor: AwareSensor {
         public override init() {
             super.init()
             dbPath = "aware_activityrecognition"
+            dbTableName = "activity_recognition"
         }
         
         public override func set(config: Dictionary<String, Any>) {
@@ -61,6 +62,22 @@ public class ActivityRecognitionSensor: AwareSensor {
         super.init()
         CONFIG = config
         initializeDbEngine(config: config)
+        
+        super.syncConfig = DbSyncConfig().apply{config in
+            config.debug = self.CONFIG.debug
+            config.serverType = self.CONFIG.serverType
+            config.dispatchQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.sync.queue")
+            config.completionHandler = { (status, error) in
+                var userInfo: Dictionary<String,Any> = [ActivityRecognitionSensor.EXTRA_STATUS :status]
+                if let e = error {
+                    userInfo[ActivityRecognitionSensor.EXTRA_ERROR] = e
+                }
+                self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncCompletion ,
+                                             object: self,
+                                             userInfo:userInfo)
+            }
+        }
+        
     }
     
     public override func start() {
@@ -101,20 +118,20 @@ public class ActivityRecognitionSensor: AwareSensor {
                     if let uwActivities = activities {
                         if uwActivities.count == 0 {
                             // USE_LAST_ACTIVITY
-                            let data = ActivityRecognitionData()
+                            var data = ActivityRecognitionData([:])
                             data.timestamp = Int64(fromDate.timeIntervalSince1970*1000)
-                            data.automotive = self.LAST_ACTIVITY.automotive
-                            data.cycling = self.LAST_ACTIVITY.cycling
-                            data.running = self.LAST_ACTIVITY.running
-                            data.stationary = self.LAST_ACTIVITY.stationary
-                            data.unknown = self.LAST_ACTIVITY.unknown
-                            data.walking = self.LAST_ACTIVITY.walking
-                            data.confidence = self.LAST_ACTIVITY.confidence
+                            data.automotive = self.LAST_ACTIVITY?.automotive ?? false
+                            data.cycling = self.LAST_ACTIVITY?.cycling ?? false
+                            data.running = self.LAST_ACTIVITY?.running ?? false
+                            data.stationary = self.LAST_ACTIVITY?.stationary ?? false
+                            data.unknown = self.LAST_ACTIVITY?.unknown ?? false
+                            data.walking = self.LAST_ACTIVITY?.walking ?? false
+                            data.confidence = self.LAST_ACTIVITY?.confidence ?? -1
                             data.label = self.CONFIG.label
                             dataArray.append(data)
                         }else{
                             for activity in uwActivities {
-                                let data = ActivityRecognitionData()
+                                var data = ActivityRecognitionData([:])
                                 data.timestamp = Int64(activity.startDate.timeIntervalSince1970*1000)
                                 data.automotive = activity.automotive
                                 data.cycling = activity.cycling
@@ -151,7 +168,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                         if let engine = self.dbEngine {
                             let queue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.save.queue")
                             queue.async {
-                                engine.save(dataArray){error in
+                                engine.save(dataArray) { error in
                                     if error == nil {
                                         DispatchQueue.main.async {
                                             self.setLastUpdateDateTime(toDate)
@@ -186,21 +203,9 @@ public class ActivityRecognitionSensor: AwareSensor {
     }
     
     public override func sync(force: Bool = false) {
-        if let engine = self.dbEngine {
-            engine.startSync(ActivityRecognitionData.TABLE_NAME , ActivityRecognitionData.self, DbSyncConfig().apply{config in
-                config.debug = self.CONFIG.debug
-                config.dispatchQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.sync.queue")
-                config.completionHandler = { (status, error) in
-                    var userInfo: Dictionary<String,Any> = [ActivityRecognitionSensor.EXTRA_STATUS :status]
-                    if let e = error {
-                        userInfo[ActivityRecognitionSensor.EXTRA_ERROR] = e
-                    }
-                    self.notificationCenter.post(name: .actionAwareActivityRecognitionSyncCompletion ,
-                                                 object: self,
-                                                 userInfo:userInfo)
-                }
-            })
-            self.notificationCenter.post(name: .actionAwareActivityRecognitionSync , object: self)
+        self.notificationCenter.post(name: .actionAwareActivityRecognitionSync , object: self)
+        if let engine = self.dbEngine, let syncConfig = self.syncConfig{
+            engine.startSync(syncConfig)
         }
     }
     

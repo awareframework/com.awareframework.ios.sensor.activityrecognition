@@ -1,7 +1,6 @@
 import XCTest
-import RealmSwift
 import com_awareframework_ios_sensor_activityrecognition
-import com_awareframework_ios_sensor_core
+import com_awareframework_ios_core
 
 class Tests: XCTestCase {
     
@@ -17,10 +16,14 @@ class Tests: XCTestCase {
     }
 
     func testStorage(){
-        #if targetEnvironment(simulator)
-        print("Controller tests (start and stop) require a real device.")
-        #else
         
+    #if targetEnvironment(simulator)
+    
+        print("Controller tests (start and stop) require a real device.")
+    
+    #else
+
+            
         class Observer:ActivityRecognitionObserver {
             weak var arExpectation: XCTestExpectation?
             func onActivityChanged(data: Array<ActivityRecognitionData>) {
@@ -37,7 +40,7 @@ class Tests: XCTestCase {
             config.debug = true
             config.interval = 1
             config.sensorObserver = observer
-            config.dbType = .REALM
+            config.dbType = .sqlite
         })
         
         let arStorageeExpect = expectation(description: "Activity Recognition Storagee")
@@ -46,8 +49,7 @@ class Tests: XCTestCase {
                                                          object: nil,
                                                          queue: .main) { (notification) in
             if let engine = sensor.dbEngine {
-                if let results = engine.fetch(ActivityRecognitionData.self,
-                                              nil) as? Results<Object>{
+                if let results = engine.fetch(filter: nil, limit: nil){
                     // arStorageeExpect.fulfill()
                     if !isDone{
                         arStorageeExpect.fulfill()
@@ -70,6 +72,7 @@ class Tests: XCTestCase {
         sensor.CONFIG.sensorObserver = nil
         NotificationCenter.default.removeObserver(obs)
         
+
         #endif
         
     }
@@ -173,7 +176,7 @@ class Tests: XCTestCase {
 //    }
     
     func testActivityRecognitionData (){
-        let dict = ActivityRecognitionData().toDictionary()
+        let dict = ActivityRecognitionData([:]).toDictionary()
         XCTAssertEqual(dict["activities"] as? String, "")
         XCTAssertEqual(dict["confidence"] as? Int, 0)
         XCTAssertFalse(dict["stationary"] as! Bool)
@@ -195,14 +198,14 @@ class Tests: XCTestCase {
         // success //
         let sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{ config in
             config.debug = true
-            config.dbType = .REALM
+            config.dbType = .sqlite
             config.dbHost = "node.awareframework.com:1001"
             config.dbPath = "sync_db"
         })
-        if let engine = sensor.dbEngine as? RealmEngine {
-            engine.removeAll(ActivityRecognitionData.self)
+        if let engine = sensor.dbEngine as? SQLiteEngine {
+            engine.removeAll()
             for _ in 0..<100 {
-                engine.save(ActivityRecognitionData())
+                engine.save([ActivityRecognitionData([:]).toDictionary()])
             }
         }
         let successExpectation = XCTestExpectation(description: "success sync")
@@ -225,7 +228,7 @@ class Tests: XCTestCase {
         // failure //
         let sensor2 = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{ config in
             config.debug = true
-            config.dbType = .REALM
+            config.dbType = .sqlite
             config.dbHost = "node.awareframework.com.com" // wrong url
             config.dbPath = "sync_db"
         })
@@ -240,10 +243,10 @@ class Tests: XCTestCase {
                                                                             }
                                                                         }
         }
-        if let engine = sensor2.dbEngine as? RealmEngine {
-            engine.removeAll(ActivityRecognitionData.self)
+        if let engine = sensor2.dbEngine as? SQLiteEngine {
+            engine.removeAll()
             for _ in 0..<100 {
-                engine.save(ActivityRecognitionData())
+                engine.save([ActivityRecognitionData([:]).toDictionary()])
             }
         }
         sensor2.sync(force: true)
