@@ -11,8 +11,8 @@ import GRDB
 
 public struct ActivityRecognitionData: BaseDbModelSQLite {
     
-    public static let TABLE_NAME = "activityRecognitionData"
-    public static let databaseTableName = "activity_recognition"  // 新しいテーブル名
+    public static let TABLE_NAME = "ios_activity_recognition"
+    public static let databaseTableName = TABLE_NAME
 
     public var timezone: Int = AwareUtils.getTimeZone()
     public var os: String = "iOS"
@@ -48,7 +48,7 @@ public struct ActivityRecognitionData: BaseDbModelSQLite {
     public static func createTable(queue: GRDB.DatabaseQueue) {
         do {
             try queue.write { db in
-                try db.create(table: ActivityRecognitionData.databaseTableName, ifNotExists: true) { t in
+                try db.create(table: ActivityRecognitionData.TABLE_NAME, ifNotExists: true) { t in
                     t.autoIncrementedPrimaryKey("id")
                     t.column("deviceId", .text).notNull()
                     t.column("timestamp", .integer).notNull()

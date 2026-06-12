@@ -65,22 +65,22 @@ Class to hold the configuration of the sensor.
 
 Contains the raw sensor data.
 
-| Field     | Type   | Description                                                         |
-| --------- | ------ | ------------------------------------------------------------------- |
-| activities | String | The detected activities' name  |
-| confidence | Int | The confidence that the motion data is accurate. (0=low, 1=medium, 2=high) |
-| stationary | Bool | A Boolean indicating whether the device is stationary.  |
-| walking | String | A Boolean indicating whether the device is on a walking person. |
-| running | String | A Boolean indicating whether the device is on a running person.  |
-| automotive | String | A Boolean indicating whether the device is in an automobile.  |
-| cycling | String | A Boolean indicating whether the device is in a bicycle.  |
-| unknown | String | A Boolean indicating whether the type of motion is unknown.  |
-| label     | String | Customizable label. Useful for data calibration or traceability     |
-| deviceId  | String | AWARE device UUID                                                                 |
-| label     | String | Customizable label. Useful for data calibration or traceability     |
-| timestamp | Int64   | Unixtime milliseconds since 1970                                          |
-| timezone  | Int    | Timezone  of the device                                       |
-| os        | String | Operating system of the device (ex. ios)                              |
+| Field       | Type   | Description                                                         |
+| ----------- | ------ | ------------------------------------------------------------------- |
+| activities  | String | The detected activities' name                                       |
+| confidence  | Int    | The confidence that the motion data is accurate. (0=low, 1=medium, 2=high) |
+| stationary  | Bool   | A Boolean indicating whether the device is stationary.              |
+| walking     | Bool   | A Boolean indicating whether the device is on a walking person.     |
+| running     | Bool   | A Boolean indicating whether the device is on a running person.     |
+| automotive  | Bool   | A Boolean indicating whether the device is in an automobile.        |
+| cycling     | Bool   | A Boolean indicating whether the device is in a bicycle.            |
+| unknown     | Bool   | A Boolean indicating whether the type of motion is unknown.         |
+| label       | String | Customizable label. Useful for data calibration or traceability     |
+| deviceId    | String | AWARE device UUID                                                   |
+| timestamp   | Int64  | Unixtime milliseconds since 1970                                    |
+| timezone    | Int    | Timezone of the device                                              |
+| os          | String | Operating system of the device (ex. ios)                            |
+| jsonVersion | Int    | JSON schema version                                                 |
 
 
 ## Example usage
