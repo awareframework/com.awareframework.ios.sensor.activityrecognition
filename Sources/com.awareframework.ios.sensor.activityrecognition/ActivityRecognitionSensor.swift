@@ -152,7 +152,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                                 case .high,.medium:
                                     if !data.unknown && (data.automotive || data.cycling || data.running || data.stationary || data.walking ) {
                                         self.LAST_ACTIVITY = data
-                                        print(ActivityRecognitionSensor.TAG, "LAST_ACTIVITY: \(data)")
+                                        if self.CONFIG.debug { print(ActivityRecognitionSensor.TAG, "LAST_ACTIVITY: \(data)") }
                                     }
                                 case .low:
                                     continue
