@@ -13,7 +13,7 @@ You can integrate this framework into your project via Swift Package Manager (Sw
 
 ### SwiftPM
 1. Open Package Manager Windows
-    * Open `Xcode` -> Select `Menu Bar` -> `File` -> `App Package Dependencies...` 
+    * Open `Xcode` -> Select `Menu Bar` -> `File` -> `App Package Dependencies...`
 
 2. Find the package using the manager
     * Select `Search Package URL` and type `git@github.com:awareframework/com.awareframework.ios.sensor.activityrecognition.git`
@@ -21,11 +21,11 @@ You can integrate this framework into your project via Swift Package Manager (Sw
 3. Import the package into your target.
 
 
-## Public functions
+## Public Functions
 
 ### ActivityRecognitionSensor
 
-+ `init(config:ActivityRecognitionSensor.Config?)` : Initializes the activity recognition sensor with the optional configuration.
++ `init(config:ActivityRecognitionSensor.Config?)`: Initializes the activity recognition sensor with the optional configuration.
 + `start()`: Starts the activity recognition sensor with the optional configuration.
 + `stop()`: Stops the service.
 
@@ -36,21 +36,21 @@ Class to hold the configuration of the sensor.
 #### Fields
 
 + `sensorObserver: ActivityRecognitionObserver`: Callback for live data updates.
-+ `interval: Int`: Data sampling interval in minute. (default = 10)
-+ `enabled: Boolean` Sensor is enabled or not. (default = `false`)
-+ `debug: Boolean` enable/disable logging to `Logcat`. (default = `false`)
-+ `label: String` Label for the data. (default = "")
-+ `deviceId: String` Id of the device that will be associated with the events and the sensor. (default = "")
-+ `dbEncryptionKey: String` Encryption key for the database. (default = `null`)
-+ `dbType: Engine` Which db engine to use for saving data. (default = `Engine.DatabaseType.NONE`)
-+ `dbPath: String` Path of the database. (default = "aware_activityrecognition")
-+ `dbHost: String` Host for syncing the database. (default = `null`)
++ `sampleIntervalSeconds: Int`: Data sampling interval in seconds. (default = `600`)
++ `enabled: Bool`: Sensor is enabled or not. (default = `false`)
++ `debug: Bool`: Enable/disable logging. (default = `false`)
++ `label: String`: Label for the data. (default = `""`)
++ `deviceId: String`: Id of the device that will be associated with the events and the sensor. (default = `""`)
++ `dbEncryptionKey: String`: Encryption key for the database. (default = `nil`)
++ `dbType: DatabaseType`: Which db engine to use for saving data. (default = `.none`)
++ `dbPath: String`: Path of the database. (default = `"aware_activityrecognition"`)
++ `dbHost: String?`: Host for syncing the database. (default = `nil`)
 
 ## Broadcasts
 
 ### Fired Broadcasts
 
-+ `ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION` fired when accelerometer saved data to db after the period ends.
++ `ActivityRecognitionSensor.ACTION_AWARE_ACTIVITYRECOGNITION`: fired when activity recognition data is saved to db after the sample interval ends.
 
 ### Received Broadcasts
 
@@ -83,11 +83,11 @@ Contains the raw sensor data.
 | jsonVersion | Int    | JSON schema version                                                 |
 
 
-## Example usage
+## Example Usage
 ```swift
-let activitySensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{config in
+let activitySensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply { config in
     config.debug = true
-    config.interval = 15
+    config.sampleIntervalSeconds = 900
     config.dbType = .sqlite
     config.sensorObserver = Observer()
 })

@@ -21,14 +21,14 @@ public class ActivityRecognitionSensor: AwareSensor {
     
     public class Config:SensorConfig{
 
-        public var interval:Int = 10 // min
+        public var sampleIntervalSeconds:Int = 600
         {
             didSet {
-                if self.interval <= 0 {
+                if self.sampleIntervalSeconds <= 0 {
                     print("[ActivityRecognition][Illegal Parameter]",
-                          "The `interval` value has to be greater than 0.",
-                          "This paprameter ('\(self.interval)') is ignored.")
-                    self.interval = oldValue
+                          "The `sampleIntervalSeconds` value has to be greater than 0.",
+                          "This paprameter ('\(self.sampleIntervalSeconds)') is ignored.")
+                    self.sampleIntervalSeconds = oldValue
                 }
             }
         }
@@ -44,8 +44,8 @@ public class ActivityRecognitionSensor: AwareSensor {
 
         public override func set(config: Dictionary<String, Any>) {
             super.set(config: config)
-            if let interval = config["interval"] as? Int {
-                self.interval = interval
+            if let sampleIntervalSeconds = config["sampleIntervalSeconds"] as? Int {
+                self.sampleIntervalSeconds = sampleIntervalSeconds
             }
             if let removeAfterSync = config["removeAfterSync"] as? Bool {
                 self.removeAfterSync = removeAfterSync
@@ -94,7 +94,7 @@ public class ActivityRecognitionSensor: AwareSensor {
         }
         if CMMotionActivityManager.isActivityAvailable() {
             self.motionActivityManager = CMMotionActivityManager()
-            self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.CONFIG.interval)*60.0, repeats: true, block: { timer in
+            self.timer = Timer.scheduledTimer(withTimeInterval: Double(self.CONFIG.sampleIntervalSeconds), repeats: true, block: { timer in
                 if !self.inRecoveryLoop {
                     self.getActivityRecognitionData()
                 }else{
@@ -113,10 +113,9 @@ public class ActivityRecognitionSensor: AwareSensor {
     public func getActivityRecognitionData(){
         if let maManager = motionActivityManager , let fromDate = self.getLastUpdateDateTime(){
             let now = Date()
-            let diffBetweemNowAndFromDate = now.minutes(from: fromDate)
-            // if self.CONFIG.debug{ print(ActivityRecognitionSensor.TAG, "diff: \(diffBetweemNowAndFromDate) min") }
-            if diffBetweemNowAndFromDate > Int(CONFIG.interval) {
-                let toDate = fromDate.addingTimeInterval(60.0*Double(self.CONFIG.interval))
+            let diffBetweemNowAndFromDate = now.timeIntervalSince(fromDate)
+            if diffBetweemNowAndFromDate > Double(CONFIG.sampleIntervalSeconds) {
+                let toDate = fromDate.addingTimeInterval(Double(self.CONFIG.sampleIntervalSeconds))
                 maManager.queryActivityStarting(from: fromDate, to: toDate, to: .main) { (activities, error) in
                     // save pedometer data
                     var dataArray = Array<ActivityRecognitionData>()
@@ -178,7 +177,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                                         DispatchQueue.main.async {
                                             self.setLastUpdateDateTime(toDate)
                                             let diffBetweenNowAndToDate = now.minutes(from: toDate)
-                                            if diffBetweenNowAndToDate > Int(self.CONFIG.interval){
+                                            if Double(diffBetweenNowAndToDate) > Double(self.CONFIG.sampleIntervalSeconds) / 60.0 {
                                                 self.inRecoveryLoop = true;
                                                 self.getActivityRecognitionData()
                                             }else{

@@ -38,7 +38,7 @@ class Tests: XCTestCase {
         observer.arExpectation = arExpect
         let sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config().apply{config in
             config.debug = true
-            config.interval = 1
+            config.sampleIntervalSeconds = 1
             config.sensorObserver = observer
             config.dbType = .sqlite
         })
@@ -146,26 +146,26 @@ class Tests: XCTestCase {
     
     func testConfig(){
         
-        let interval = 1
+        let sampleIntervalSeconds = 1
 
         // default check
         var sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config.init())
-        XCTAssertEqual(10, sensor.CONFIG.interval)
+        XCTAssertEqual(600, sensor.CONFIG.sampleIntervalSeconds)
         
         sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config.init().apply{config in
-            config.interval = interval
+            config.sampleIntervalSeconds = sampleIntervalSeconds
         })
-        XCTAssertEqual(interval, sensor.CONFIG.interval)
+        XCTAssertEqual(sampleIntervalSeconds, sensor.CONFIG.sampleIntervalSeconds)
         
-        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config(["interval":interval]))
-        XCTAssertEqual(interval, sensor.CONFIG.interval)
+        sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config(["sampleIntervalSeconds":sampleIntervalSeconds]))
+        XCTAssertEqual(sampleIntervalSeconds, sensor.CONFIG.sampleIntervalSeconds)
         
         sensor = ActivityRecognitionSensor.init(ActivityRecognitionSensor.Config())
-        sensor.CONFIG.set(config: ["interval":interval])
-        XCTAssertEqual(interval, sensor.CONFIG.interval)
+        sensor.CONFIG.set(config: ["sampleIntervalSeconds":sampleIntervalSeconds])
+        XCTAssertEqual(sampleIntervalSeconds, sensor.CONFIG.sampleIntervalSeconds)
         
-        sensor.CONFIG.interval = -10
-        XCTAssertEqual(interval, sensor.CONFIG.interval)
+        sensor.CONFIG.sampleIntervalSeconds = -10
+        XCTAssertEqual(sampleIntervalSeconds, sensor.CONFIG.sampleIntervalSeconds)
     }
     
 //    func testPerformanceExample() {
