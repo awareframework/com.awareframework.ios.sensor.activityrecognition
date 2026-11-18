@@ -34,7 +34,6 @@ public class ActivityRecognitionSensor: AwareSensor {
         }
 
         public var sensorObserver:ActivityRecognitionObserver?
-        public var removeAfterSync:Bool = false
 
         public override init() {
             super.init()
@@ -46,9 +45,6 @@ public class ActivityRecognitionSensor: AwareSensor {
             super.set(config: config)
             if let sampleIntervalSeconds = config["sampleIntervalSeconds"] as? Int {
                 self.sampleIntervalSeconds = sampleIntervalSeconds
-            }
-            if let removeAfterSync = config["removeAfterSync"] as? Bool {
-                self.removeAfterSync = removeAfterSync
             }
         }
         
@@ -70,7 +66,6 @@ public class ActivityRecognitionSensor: AwareSensor {
         super.syncConfig = DbSyncConfig().apply{config in
             config.debug = self.CONFIG.debug
             config.serverType = self.CONFIG.serverType
-            config.removeAfterSync = self.CONFIG.removeAfterSync
             config.dispatchQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.sync.queue")
             config.completionHandler = { (status, error) in
                 var userInfo: Dictionary<String,Any> = [ActivityRecognitionSensor.EXTRA_STATUS :status]
