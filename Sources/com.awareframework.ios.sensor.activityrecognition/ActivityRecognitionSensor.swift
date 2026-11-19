@@ -18,6 +18,10 @@ public class ActivityRecognitionSensor: AwareSensor {
     var motionActivityManager:CMMotionActivityManager?
     var timer:Timer? = nil
     var inRecoveryLoop = false
+    /// Rows are written here, one batch at a time in the order they were collected: off the main
+    /// thread and off the queue that delivers the query results. `.utility`, since storing data is not work
+    /// the user waits for (a queue created for each save ran at the receiving queue's priority).
+    private let saveQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.save", qos: .utility)
     
     public class Config:SensorConfig{
 
@@ -165,8 +169,7 @@ public class ActivityRecognitionSensor: AwareSensor {
                         }
                         
                         if let engine = self.dbEngine {
-                            let queue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.save.queue")
-                            queue.async {
+                            self.saveQueue.async {
                                 engine.save(dataArray) { error in
                                     if error == nil {
                                         DispatchQueue.main.async {
