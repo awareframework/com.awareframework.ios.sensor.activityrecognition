@@ -1,8 +1,39 @@
 import XCTest
-import com_awareframework_ios_sensor_activityrecognition
+@testable import com_awareframework_ios_sensor_activityrecognition
 import com_awareframework_ios_core
 
 class Tests: XCTestCase {
+
+    func testHistoryCursorPreservesExactDate() {
+        let sensor = ActivityRecognitionSensor(ActivityRecognitionSensor.Config().apply { $0.dbType = .none })
+        let defaults = UserDefaults.standard
+        let key = ActivityRecognitionSensor.KEY_LAST_UPDATE_DATETIME
+        let original = defaults.object(forKey: key)
+        defer {
+            if let original { defaults.set(original, forKey: key) }
+            else { defaults.removeObject(forKey: key) }
+        }
+
+        let formatter = ISO8601DateFormatter()
+        let first = formatter.date(from: "2026-11-01T01:00:07-07:00")!
+        let second = formatter.date(from: "2026-11-01T01:00:07-08:00")!
+        sensor.setLastUpdateDateTime(first)
+        XCTAssertEqual(sensor.getLastUpdateDateTime(), first)
+        sensor.setLastUpdateDateTime(second)
+        XCTAssertEqual(sensor.getLastUpdateDateTime(), second)
+    }
+
+    func testHistoryWindowSelectsCarryInAndDefersEndBoundary() {
+        let start = Date(timeIntervalSince1970: 600)
+        let end = start.addingTimeInterval(60)
+        let prior = start.addingTimeInterval(-30)
+        let inside = start.addingTimeInterval(20)
+
+        XCTAssertEqual(ActivityRecognitionSensor.activitiesForWindow([prior, inside, end], range: start..<end, timestamp: \.self),
+                       [prior, inside])
+        XCTAssertEqual(ActivityRecognitionSensor.activitiesForWindow([prior, start, end], range: start..<end, timestamp: \.self),
+                       [start])
+    }
     
     override func setUp() {
         super.setUp()
