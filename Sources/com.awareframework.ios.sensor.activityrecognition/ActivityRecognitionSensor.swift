@@ -21,13 +21,22 @@ public class ActivityRecognitionSensor: AwareSensor {
     private var isQuerying = false
     private var isSaving = false
     private static let historyLimit: TimeInterval = 7 * 24 * 60 * 60
-    private static let maxWindowsPerTick = 60
     // Historical queries can lag by several minutes. Give recent empty windows time to settle.
     private static let publicationGrace: TimeInterval = 5 * 60
     /// Rows are written here, one batch at a time in the order they were collected: off the main
     /// thread and off the queue that delivers the query results. `.utility`, since storing data is not work
     /// the user waits for (a queue created for each save ran at the receiving queue's priority).
     private let saveQueue = DispatchQueue(label: "com.awareframework.ios.sensor.activityrecognition.save", qos: .utility)
+
+    // MARK: Debug trace (CONFIG.debug): see HistoryTrace. Main queue only.
+    let trace = HistoryTrace(name: "activityrecognition", tag: ActivityRecognitionSensor.TAG)
+    private static let stallThreshold: TimeInterval = 120
+    private var runID = 0
+    private var tickCount = 0
+    private var querySeq = 0
+    private var queryStartedAt: Date?
+    private var queryWindow: (start: Date, end: Date)?
+    private var saveStartedAt: Date?
     
     public class Config:SensorConfig{
 
@@ -125,8 +134,12 @@ public class ActivityRecognitionSensor: AwareSensor {
             return
         }
         motionActivityManager = CMMotionActivityManager()
+        runID += 1
+        trace.isEnabled = CONFIG.debug
+        trace.log("START run=\(runID) interval=\(CONFIG.sampleIntervalSeconds)s authorization=\(Self.authorizationDescription()) cursor=\(trace.format(UserDefaults.standard.object(forKey: Self.KEY_LAST_UPDATE_DATETIME) as? Date)) isQuerying=\(isQuerying) isSaving=\(isSaving)")
         timer = Timer.scheduledTimer(withTimeInterval: Double(CONFIG.sampleIntervalSeconds), repeats: true) { [weak self] timer in
             guard let self else { timer.invalidate(); return }
+            self.traceTick()
             self.getActivityRecognitionData()
         }
         timer?.fire()
@@ -138,39 +151,63 @@ public class ActivityRecognitionSensor: AwareSensor {
             DispatchQueue.main.async { [weak self] in self?.getActivityRecognitionData() }
             return
         }
-        fetchNextWindow(remaining: Self.maxWindowsPerTick)
+        // Each tick catches up to now: a window takes a few milliseconds, so there is no per-tick limit
+        fetchNextWindow(done: 0)
     }
 
-    private func fetchNextWindow(remaining: Int) {
-        guard remaining > 0, !isQuerying, !isSaving,
-              let manager = motionActivityManager, let cursor = getLastUpdateDateTime() else { return }
+    private func fetchNextWindow(done: Int) {
+        guard !isQuerying else { return traceTickEnd(done, "busy: query #\(querySeq) outstanding \(age(queryStartedAt))") }
+        guard !isSaving else { return traceTickEnd(done, "busy: save outstanding \(age(saveStartedAt))") }
+        guard let manager = motionActivityManager else { return traceTickEnd(done, "no manager (stopped)") }
+        guard let cursor = getLastUpdateDateTime() else { return traceTickEnd(done, "no cursor") }
 
         let now = Date()
         let fromDate = max(cursor, now.addingTimeInterval(-Self.historyLimit))
         let toDate = fromDate.addingTimeInterval(Double(CONFIG.sampleIntervalSeconds))
-        guard toDate > fromDate, toDate <= now else { return }
+        guard toDate > fromDate, toDate <= now else {
+            return traceTickEnd(done, "caught up (cursor=\(trace.format(cursor)))")
+        }
 
         isQuerying = true
+        querySeq += 1
+        let seq = querySeq
+        let run = runID
+        let issuedAt = Date()
+        queryStartedAt = issuedAt
+        queryWindow = (fromDate, toDate)
         manager.queryActivityStarting(from: fromDate, to: toDate, to: .main) { [weak self, weak manager] activities, error in
-            guard let self, let manager, self.motionActivityManager === manager else { return }
+            guard let self else { return }
+            let queryMs = Int(Date().timeIntervalSince(issuedAt) * 1000)
+            guard let manager, self.motionActivityManager === manager else {
+                self.trace.log("LATE query #\(seq) of run \(run) answered after \(queryMs)ms; current run=\(self.runID) isQuerying=\(self.isQuerying)")
+                return
+            }
             self.isQuerying = false
+            self.queryStartedAt = nil
 
             if let error = error as NSError? {
                 // For this API Core Motion reports CMErrorUnknown when the range has no samples.
                 if error.domain == CMErrorDomain, error.code == Int(CMErrorUnknown.rawValue),
                    Date().timeIntervalSince(toDate) >= Self.publicationGrace {
+                    self.trace.log("WIN #\(seq) \(self.trace.format(fromDate)) empty (CMErrorUnknown) query=\(queryMs)ms")
                     self.advanceCursor(to: toDate)
-                    self.fetchNextWindow(remaining: remaining - 1)
-                } else if self.CONFIG.debug {
-                    print(Self.TAG, "Activity history query failed: \(error)")
+                    self.fetchNextWindow(done: done + 1)
+                } else {
+                    self.trace.log("QUERY #\(seq) FAILED \(self.trace.format(fromDate))..\(self.trace.format(toDate)) after \(queryMs)ms error=\(error.domain)/\(error.code) \(error.localizedDescription) authorization=\(Self.authorizationDescription())")
+                    if self.CONFIG.debug {
+                        print(Self.TAG, "Activity history query failed: \(error)")
+                    }
                 }
                 return
             }
-            guard let activities else { return }
+            guard let activities else {
+                self.trace.log("QUERY #\(seq) returned nil activities without error after \(queryMs)ms")
+                return
+            }
 
             let (rows, lastActivity) = self.makeRows(from: activities, start: fromDate, end: toDate)
             if self.CONFIG.dbType == .none {
-                self.finishWindow(rows, lastActivity: lastActivity, end: toDate, manager: manager, remaining: remaining)
+                self.finishWindow(rows, lastActivity: lastActivity, end: toDate, manager: manager, done: done)
                 return
             }
             guard let engine = self.dbEngine else {
@@ -180,16 +217,26 @@ public class ActivityRecognitionSensor: AwareSensor {
 
             // Keep the write slot until this accepted save finishes, even across a stop/start.
             self.isSaving = true
+            let saveQueuedAt = Date()
+            self.saveStartedAt = saveQueuedAt
+            let activityCount = activities.count
             self.saveQueue.async { [weak self, weak manager] in
+                let saveBeganAt = Date()
                 engine.save(rows) { error in
+                    let savedAt = Date()
                     DispatchQueue.main.async { [weak self, weak manager] in
                         guard let self else { return }
                         self.isSaving = false
+                        self.saveStartedAt = nil
+                        let waitMs = Int(saveBeganAt.timeIntervalSince(saveQueuedAt) * 1000)
+                        let saveMs = Int(savedAt.timeIntervalSince(saveBeganAt) * 1000)
                         if let error {
+                            self.trace.log("SAVE #\(seq) FAILED after wait=\(waitMs)ms save=\(saveMs)ms error=\(error)")
                             if self.CONFIG.debug { print(Self.TAG, "Activity history save failed: \(error)") }
                             return
                         }
-                        self.finishWindow(rows, lastActivity: lastActivity, end: toDate, manager: manager, remaining: remaining)
+                        self.trace.log("WIN #\(seq) \(self.trace.format(fromDate)) activities=\(activityCount) rows=\(rows.count) query=\(queryMs)ms saveWait=\(waitMs)ms save=\(saveMs)ms")
+                        self.finishWindow(rows, lastActivity: lastActivity, end: toDate, manager: manager, done: done)
                     }
                 }
             }
@@ -245,7 +292,7 @@ public class ActivityRecognitionSensor: AwareSensor {
     }
 
     private func finishWindow(_ rows: [ActivityRecognitionData], lastActivity: ActivityRecognitionData?,
-                              end: Date, manager: CMMotionActivityManager?, remaining: Int) {
+                              end: Date, manager: CMMotionActivityManager?, done: Int) {
         advanceCursor(to: end)
         guard let manager, motionActivityManager === manager else { return }
         LAST_ACTIVITY = lastActivity
@@ -253,7 +300,44 @@ public class ActivityRecognitionSensor: AwareSensor {
         guard motionActivityManager === manager else { return }
         notificationCenter.post(name: .actionAwareActivityRecognition, object: self)
         guard motionActivityManager === manager else { return }
-        fetchNextWindow(remaining: remaining - 1)
+        fetchNextWindow(done: done + 1)
+    }
+
+    // MARK: Debug trace
+
+    private func age(_ date: Date?) -> String {
+        guard let date else { return "?s" }
+        return String(format: "%.1fs", Date().timeIntervalSince(date))
+    }
+
+    static func authorizationDescription() -> String {
+        guard #available(iOS 11.0, *) else { return "n/a" }
+        switch CMMotionActivityManager.authorizationStatus() {
+        case .notDetermined: return "notDetermined"
+        case .restricted: return "restricted"
+        case .denied: return "denied"
+        case .authorized: return "authorized"
+        @unknown default: return "unknown"
+        }
+    }
+
+    /// One line per timer tick, and a STALL line while a query or save has not finished for long
+    private func traceTick() {
+        tickCount += 1
+        trace.isEnabled = CONFIG.debug
+        guard trace.isEnabled else { return }
+        let cursor = UserDefaults.standard.object(forKey: Self.KEY_LAST_UPDATE_DATETIME) as? Date
+        trace.log("TICK #\(tickCount) run=\(runID) app=\(trace.appState) protectedData=\(trace.protectedDataAvailable) manager=\(motionActivityManager != nil) isQuerying=\(isQuerying) isSaving=\(isSaving) cursor=\(trace.format(cursor)) lag=\(cursor.map { Int(Date().timeIntervalSince($0) / 60) } ?? -1)min")
+        if isQuerying, let started = queryStartedAt, Date().timeIntervalSince(started) > Self.stallThreshold {
+            trace.log("STALL query #\(querySeq) outstanding \(age(started)) window=\(trace.format(queryWindow?.start))..\(trace.format(queryWindow?.end)) authorization=\(Self.authorizationDescription())")
+        }
+        if isSaving, let started = saveStartedAt, Date().timeIntervalSince(started) > Self.stallThreshold {
+            trace.log("STALL save outstanding \(age(started))")
+        }
+    }
+
+    private func traceTickEnd(_ windows: Int, _ reason: String) {
+        trace.log("TICK END windows=\(windows) reason=\(reason)")
     }
 
     private func advanceCursor(to end: Date) {
@@ -268,6 +352,7 @@ public class ActivityRecognitionSensor: AwareSensor {
             return
         }
         guard motionActivityManager != nil else { return }
+        trace.log("STOP run=\(runID) isQuerying=\(isQuerying) (#\(querySeq)) isSaving=\(isSaving) cursor=\(trace.format(UserDefaults.standard.object(forKey: Self.KEY_LAST_UPDATE_DATETIME) as? Date))")
         timer?.invalidate()
         timer = nil
         motionActivityManager = nil
